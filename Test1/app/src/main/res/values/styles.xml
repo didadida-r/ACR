@@ -1,0 +1,22 @@
+<resources>
+
+    <!-- Base application theme. Base.Theme.AppCompat.Light.DarkActionBar-->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- ActionBar color-->
+        <item name="colorPrimary">@color/material_blue_500</item>
+        <!-- TitleBar color -->
+        <item name="colorPrimaryDark">@color/material_blue_700</item>
+        <!-- color for editText&ratioButton&checkBox and so on when chosen-->
+        <item name="colorAccent">@color/material_green_A200</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+</resources>
