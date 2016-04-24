@@ -1,7 +1,5 @@
-#include "common.h"
 #include "wav.h"
-#include <stdio.h>
-#include <string.h>
+
 
 /*
  *--------------------------------------------------------------------------------------
@@ -40,6 +38,8 @@ int openWavFile(const char* fileName, float **gWavDataIn, int *maxInSamples)
     *maxInSamples = 0;
     *maxInSamples = 0;
 
+
+    
     /* allocate wav header */
 	pWavHeader =(WAV_HDR *)malloc(sizeof(WAV_HDR));
 	pChunkHeader =(CHUNK_HDR *)malloc(sizeof(CHUNK_HDR));
@@ -62,7 +62,7 @@ int openWavFile(const char* fileName, float **gWavDataIn, int *maxInSamples)
     /* 
      * open the wav file 
      */
-    pFile= fopen(fileName, "rb");
+    pFile = fopen( fileName, "rb");
     if(pFile == NULL)
     {
         printf("Can't open wav file.\n");
@@ -228,8 +228,6 @@ int openWavFile(const char* fileName, float **gWavDataIn, int *maxInSamples)
             (*gWavDataIn)[i] = (double) (pC[i]);
         }
     }
-
-
 
 
    if(wBuffer != NULL) free(wBuffer);//delete wBuffer;

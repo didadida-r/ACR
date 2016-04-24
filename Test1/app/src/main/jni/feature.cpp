@@ -6,10 +6,7 @@
  *--------------------------------------------------------------------------------------
  */
 
-#include "common.h"
 #include "feature.h"
-#include <math.h>
-#include <stdio.h>
 
 #define PI   3.14159265358979
 #define TPI  6.28318530717959     /* PI*2 */
@@ -535,7 +532,7 @@ bool wav2mfc(float *pwav, int nSamples, Vector *pmfccData, int *nFrames, int *lO
   fbInfo.x=NULL;
 
 
-
+  //LOGE("wav2 A");
   *lOfMfcc=DIMENSION;//原为 *lOfMfcc=lenOfMfcc;
     
   *nFrames=(int) floor(((float) (nSamples-frameSize)/skip)) +1;
@@ -545,7 +542,7 @@ bool wav2mfc(float *pwav, int nSamples, Vector *pmfccData, int *nFrames, int *lO
     
   mfccData=CreateVector((*nFrames)*lenOfMfcc);
   *pmfccData=mfccData;
- 
+  //LOGE("wav2 b");
   /*static MFCCs*/
   pbuf=mfccData;
   for(i=0;i<*nFrames;i++)
@@ -567,13 +564,13 @@ bool wav2mfc(float *pwav, int nSamples, Vector *pmfccData, int *nFrames, int *lO
 	  pbuf += lenOfMfcc; 
 
 
-	  free(fbInfo.cf);   //鑷姞鐨勯噴鏀惧姩鎬佸唴瀛樿鍙�
+	  free(fbInfo.cf);
 	  free(fbInfo.loWt);
 	  free(fbInfo.x);
 	  free(fbInfo.loChan);
 
   }
-  
+  //LOGE("wav2 c");
   pbuf=&mfccData[1];
   AddDiffs(pbuf, *nFrames, lenOfMfcc, step, diffWin, nhead, 
 	  ntail);
@@ -583,8 +580,7 @@ bool wav2mfc(float *pwav, int nSamples, Vector *pmfccData, int *nFrames, int *lO
 
 
   FZeroMean(&mfccData[1], step, *nFrames, lenOfMfcc);
-
-  //浠ヤ笅涓鸿嚜鍔犵殑閲婃斁鍐呭瓨璇彞
+  //LOGE("wav2 d");
   free(hamWin);hamWin=NULL;
   free(cepWin);cepWin=NULL;
   free(frameData);frameData=NULL;
@@ -616,10 +612,10 @@ skip=160;
 srcSampRate=625;
 
 step=13;
-lenOfMfcc = 39;
+lenOfMfcc=39;
 
 diffWin=2;
-
+  //LOGE("wav2 e");
 }
 
 
@@ -634,7 +630,7 @@ void mfccToFeature(Feature* pFeature,Vector mfccData,int frameNum,int mfccDimens
 		for (j=0;j<mfccDimension;j++)
 		{
 			mfccData++;
-			pFeature[i].data[j]=*mfccData;	
+			pFeature[i].data[j]=*mfccData;		
 		}
 	}
 }

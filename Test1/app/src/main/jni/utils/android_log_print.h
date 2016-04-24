@@ -11,7 +11,7 @@
 
 #ifdef IS_DEBUG
 
-#define LOG_TAG ("CUSTOMER_NDK_JNI")
+#define LOG_TAG ("debug")
 
 #define LOGV(...) ((void)__android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__))
 

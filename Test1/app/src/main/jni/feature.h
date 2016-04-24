@@ -10,20 +10,16 @@ Version:
 #ifndef _FEATURE_H_
 #define _FEATURE_H_
 
+#include "common.h";
+
+
+
 typedef float *Vector;     /* vector[1..size]   */
 typedef short *ShortVec;   /* short vector[1..size] */
 /* Boolean type definition */
 typedef enum {FALSE=0, TRUE=1} Boolean;
 //typedef enum {false=0,true=1} bool;
-
-
-typedef struct Feature
-{
-	float *data;
-}Feature;
-
 /* -------------------- MFCC Related Operations -------------------- */
-
 typedef struct{
    int frameSize;       /* speech frameSize */
    int numChans;        /* number of channels */
@@ -38,7 +34,6 @@ typedef struct{
    Vector loWt;         /* array[1..fftN/2] of loChan weighting */
    Vector x;            /* array[1..fftN] of fftchans */
 }FBankInfo;
-
 
 void PreEmphasise (Vector s, float k);
 
