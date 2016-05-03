@@ -120,6 +120,5 @@ public class ThreadPoolManager {
 
             Log.i(TAG, "结束轮询");
         }
-
     }
 }

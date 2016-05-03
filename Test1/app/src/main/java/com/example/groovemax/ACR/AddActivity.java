@@ -18,7 +18,6 @@ import android.widget.Toast;
 import com.example.groovemax.ACR.Application.MyApplication;
 import com.example.groovemax.ACR.SQLite.DataBaseHelper;
 import com.example.groovemax.ACR.Utils.Chinese2PinYin;
-import com.example.groovemax.ACR.net.GetHelper;
 import com.example.groovemax.ACR.net.ThreadPoolTaskLoadHmm;
 
 import java.io.ByteArrayOutputStream;
@@ -27,7 +26,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,9 +70,9 @@ public class AddActivity extends AppCompatActivity {
     }
 
     /*
-         * to init the Ui
-         * 添加toolbar、为listView添加适配器
-         */
+     * to init the Ui, and add new cmd
+     * 添加toolbar、为listView添加适配器
+     */
     private void initUi(){
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         //这是AppCompatActivity的方法，要在setSupportActionBar前完成
@@ -96,24 +97,37 @@ public class AddActivity extends AppCompatActivity {
         pinyinLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (pinyinEd.getText() == null)
+                    return;
                 String cmdChinese = pinyinEd.getText().toString();
-                String cmdPinYin = mDate.get(position).get("pinyin").toString();
-
-                //insert the new cmd to database
-                Cursor cursor = helper.getReadableDatabase().rawQuery("select * from cmd_table where " +
-                        "cmd_content like ?", new String[]{cmdChinese});
-                if(cursor != null){
-                    Toast.makeText(AddActivity.this, "this command is already added!", Toast.LENGTH_SHORT).show();
+                cmdChinese = cmdChinese.replaceAll("[^(\\u4e00-\\u9fa5)]", "");//过滤输入
+                if (cmdChinese == null) {
+                    Toast.makeText(AddActivity.this, "please input chinese!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                helper.getReadableDatabase().execSQL("insert into cmd_table values(null, ?)",
-                        new String[]{cmdChinese});
+                if (cmdChinese.equals("")) {
+                    Toast.makeText(AddActivity.this, "please input chinese!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String cmdPinYin = mDate.get(position).get("pinyin").toString();
 
                 //readFromFile();
                 String[] split = convert.splitPY(cmdPinYin);
                 String[] triPY = convert.py2Tri(split);
-                write2File(convert.getCmdTri());
 
+                //check and insert the new cmd to database
+                Cursor cursor = helper.getReadableDatabase().rawQuery("select * from cmd_table where " +
+                        "cmd_content=?", new String[]{cmdChinese});
+                if (cursor.moveToFirst()) {
+                    Toast.makeText(AddActivity.this, "this command is already added!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                cursor.close();
+                helper.getReadableDatabase().execSQL("insert into cmd_table values(NULL, ?, ?)",
+                        new String[]{cmdChinese, convert.getCmdTri()});
+
+                //start to download models from server
                 MyApplication.getThreadPoolManager().addAsyncTask(new ThreadPoolTaskLoadHmm(triPY));
                 finish();
             }
@@ -121,18 +135,16 @@ public class AddActivity extends AppCompatActivity {
     }
 
     /*
-    * function:监听输入，并实时显示
-    */
+     * function:监听输入，并实时显示
+     */
     private void inputCheck(){
         pinyinEd.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
 
             @Override
@@ -142,22 +154,46 @@ public class AddActivity extends AppCompatActivity {
                     adapter.notifyDataSetChanged();
                     return;
                 }
-                ChineseToPY(pinyinEd.getText().toString());
-                adapter.notifyDataSetChanged();
+                if(ChineseToPY(pinyinEd.getText().toString()) == 0)
+                     adapter.notifyDataSetChanged();
             }
         });
     }
 
     /*
      * function:将中文转化为拼音，并进行排列组合，存储在listView的mData中
+     * 注：中文转拼音类对于某些中文字符不能转化，比如“嚒",需要检测
      */
-    private void ChineseToPY(String input){
+    private int ChineseToPY(String input){
         input = input.replaceAll("[^(\\u4e00-\\u9fa5)]", "");//过滤输入
+        if(input == null)
+            return -1;
+        if(input.equals(""))
+            return -1;
 
         String[][] result = new String[input.length()][];//存储转化后的结果，每一个汉字对于一个一维数组
 
-        for(int i = 0; i<input.length(); i++)
+        for(int i = 0; i<input.length(); i++){
             result[i] = convert.getCharPinYin(input.charAt(i));
+            if(result[i] == null){
+                Toast.makeText(this, "指令包含不支持的中文字符", Toast.LENGTH_SHORT).show();
+                return -1;
+            }
+            if(result[i][0] == null){
+                Toast.makeText(this, "指令包含不支持的中文字符", Toast.LENGTH_SHORT).show();
+                return -1;
+            }
+            if(result[i].length == 0){
+                Toast.makeText(this, "指令包含不支持的中文字符", Toast.LENGTH_SHORT).show();
+                return -1;
+            }
+        }
+
+
+        if(result[0] == null)
+            return -1;
+        if(result[0].equals(""))
+            return -1;
 
         int num = 1;
         for(String[] tmp : result)
@@ -204,6 +240,8 @@ public class AddActivity extends AppCompatActivity {
             //这里记得新建一个，不然无效
             item = new HashMap<String, Object>();
         }
+
+        return 0;
     }
 
     /*
